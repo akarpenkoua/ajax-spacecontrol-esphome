@@ -1,0 +1,83 @@
+esphome:
+  name: ajax_control
+  platform: ESP32
+  board: nodemcu-32s
+
+wifi:
+  ssid: "YOUR_SSID_HERE"
+  password: "YOUR_SSID_PASS_HERE"
+# Optional manual IP
+  manual_ip:
+    static_ip: 192.168.X.XX # (XX - USE YOURS!)
+    gateway: 192.168.X.X # (XX - USE YOURS!)
+    subnet: 255.255.255.0 # (USE YOURS!)
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Ajax Fallback Hotspot"
+    password: "PASSWORD"
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: "PASSWORD"
+
+ota:
+  password: "PASSWORD"
+
+# Sensors section
+# Wifi and Firmware info
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: IP Ajax control
+    ssid:
+      name: Ajax control connected SSID
+  - platform: version
+    name: "Firmware Ajax control"
+
+# Wifi signal
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal Ajax control"
+    update_interval: 60s
+
+#Switch lines
+# GPIOS were found experimental way. We need those who do not fire on boot!
+switch: 
+# button 1 
+  - platform: gpio 
+    pin: GPIO12 
+    id: relay_disarm 
+  - platform: template 
+    name: "Ajax disarm" 
+    icon: "mdi:shield-off" 
+    turn_on_action: 
+    - switch.turn_on: relay_disarm 
+    - delay: 500ms 
+    - switch.turn_off: relay_disarm 
+# button 2     
+  - platform: gpio 
+    pin: GPIO13 
+    id: relay_arm 
+  - platform: template 
+    name: "Ajax arm" 
+    icon: "mdi:shield-key" 
+    turn_on_action: 
+    - switch.turn_on: relay_arm 
+    - delay: 500ms 
+    - switch.turn_off: relay_arm    
+# button 3     
+  - platform: gpio 
+    pin: GPIO14 
+    id: relay_night 
+  - platform: template 
+    name: "Ajax night" 
+    icon: "mdi:shield-half-full" 
+    turn_on_action: 
+    - switch.turn_on: relay_night 
+    - delay: 500ms
+    - switch.turn_off: relay_night   
