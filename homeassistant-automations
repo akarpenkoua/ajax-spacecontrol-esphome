@@ -1,0 +1,44 @@
+- id: 'sia_to_alarm'
+  alias: Setting up alarm status if SIA has changed
+  description: SIA to Alarm sync
+  trigger:
+    platform: state
+    entity_id: alarm_control_panel.parkova44_1_alarm_2
+  condition:
+    - condition: template
+      value_template: "{{ states('alarm_control_panel.parkova44_1_alarm_2') != states('alarm_control_panel.house')  }}"
+  action:
+    service_template: >
+          {% if is_state('alarm_control_panel.parkova44_1_alarm_2', 'disarmed') %}
+            alarm_control_panel.alarm_disarm
+          {% elif is_state('alarm_control_panel.parkova44_1_alarm_2', 'armed_night') %}
+            alarm_control_panel.alarm_arm_night
+          {% elif is_state('alarm_control_panel.parkova44_1_alarm_2', 'armed_away') %}
+            alarm_control_panel.alarm_arm_away
+          {% else %}
+          {% endif %}
+    entity_id: alarm_control_panel.house
+    data:
+        code: !secret artem_alarm_code
+# way to manage Ajax
+- id: 'alarm_to_ajax'
+  alias: Setting up Ajax status if House alarm has changed
+  description: Alarm to Ajax sync
+  trigger:
+    platform: state
+    entity_id: alarm_control_panel.house
+  condition:
+    - condition: template
+      value_template: "{{ states('alarm_control_panel.parkova44_1_alarm_2') != states('alarm_control_panel.house')  }}"
+  action:
+    service: switch.turn_on
+    data_template:
+        entity_id: >
+          {% if is_state('alarm_control_panel.house', 'disarmed') %}
+            switch.ajax_disarm
+          {% elif is_state('alarm_control_panel.house', 'armed_night') %}
+            switch.ajax_night
+          {% elif is_state('alarm_control_panel.house', 'armed_away') %}
+            switch.ajax_arm
+          {% else %}
+          {% endif %}
